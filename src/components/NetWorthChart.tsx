@@ -146,8 +146,8 @@ export const NetWorthChart: React.FC<NetWorthChartProps> = ({ accounts, balances
       tooltip: {
         callbacks: {
           label: function(context: TooltipItem<'line'>) {
-            const label = context.dataset.label || '';
-            return `${label}: ${formatCurrency(context.parsed.y)}`;
+            const y = context.parsed.y;
+            return y == null ? 'Balance: N/A' : `Balance: ${formatCurrency(y)}`;
           },
         },
       },

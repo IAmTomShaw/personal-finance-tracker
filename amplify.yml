@@ -23,7 +23,6 @@ applications:
           commands:
             - test -n "$AUTH0_SECRET"
             - test -n "$AUTH0_BASE_URL"
-            - test -n "$AUTH0_ISSUER_BASE_URL"
             - test -n "$AUTH0_CLIENT_ID"
             - test -n "$AUTH0_CLIENT_SECRET"
             - test -n "$AUTH0_DOMAIN"

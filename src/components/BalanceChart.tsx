@@ -83,7 +83,8 @@ export const BalanceChart: React.FC<BalanceChartProps> = ({ account, balances, h
       tooltip: {
         callbacks: {
           label: function(context: TooltipItem<'line'>) {
-            return `Balance: ${formatCurrency(context.parsed.y)}`;
+            const y = context.parsed.y;
+            return y == null ? 'Balance: N/A' : `Balance: ${formatCurrency(y)}`;
           },
         },
       },
