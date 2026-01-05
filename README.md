@@ -1,5 +1,5 @@
 
-# Personal Finance — Next.js App 💸
+# Personal Finance Tracker — Next.js App 💸
 
 A small, privacy-first personal finance tracker built with Next.js and TypeScript. Track accounts, record balances, view net worth and historical charts, and optionally sync with a cloud backend.
 
