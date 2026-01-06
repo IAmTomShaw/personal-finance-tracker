@@ -1,7 +1,11 @@
-import type { NextRequest } from "next/server";
-import { auth0 } from "./lib/auth0";
+import { NextResponse, type NextRequest } from "next/server";
+import { auth0, isAuth0Configured } from "./lib/auth0";
 
 export async function middleware(request: NextRequest) {
+  // If Auth0 is not configured, skip the middleware and allow the request
+  if (!isAuth0Configured) {
+    return NextResponse.next();
+  }
   return await auth0.middleware(request);
 }
 
