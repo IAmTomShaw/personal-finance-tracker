@@ -7,10 +7,10 @@ const isConfigured = !!(
   process.env.AUTH0_SECRET
 );
 
-export const auth0 = isConfigured
+export const auth0: Auth0Client | null = isConfigured
   ? new Auth0Client({
     appBaseUrl: process.env.APP_BASE_URL || process.env.AUTH0_BASE_URL,
   })
-  : ({} as Auth0Client); // Fallback to empty object if not configured
+  : null;
 
 export const isAuth0Configured = isConfigured;

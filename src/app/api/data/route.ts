@@ -8,9 +8,9 @@ export const runtime = 'nodejs';
 
 export async function GET() {
 
-  if (!isAuth0Configured || !process.env.DATABASE_URL) {
+  if (!isAuth0Configured || !auth0 || !process.env.DATABASE_URL) {
     return NextResponse.json(
-      { error: 'Cloud sync not configured' },
+      { error: 'Cloud sync unavailable: Auth0 or database not configured' },
       { status: 503 }
     );
   }
@@ -40,9 +40,9 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
 
-  if (!isAuth0Configured || !process.env.DATABASE_URL) {
+  if (!isAuth0Configured || !auth0 || !process.env.DATABASE_URL) {
     return NextResponse.json(
-      { error: 'Cloud sync not configured' },
+      { error: 'Cloud sync unavailable: Auth0 or database not configured' },
       { status: 503 }
     );
   }
@@ -82,9 +82,9 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE() {
 
-  if (!isAuth0Configured || !process.env.DATABASE_URL) {
+  if (!isAuth0Configured || !auth0 || !process.env.DATABASE_URL) {
     return NextResponse.json(
-      { error: 'Cloud sync not configured' },
+      { error: 'Cloud sync unavailable: Auth0 or database not configured' },
       { status: 503 }
     );
   }

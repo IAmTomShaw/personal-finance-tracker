@@ -3,7 +3,7 @@ import { auth0, isAuth0Configured } from "./lib/auth0";
 
 export async function middleware(request: NextRequest) {
   // If Auth0 is not configured, skip the middleware and allow the request
-  if (!isAuth0Configured) {
+  if (!isAuth0Configured || !auth0) {
     return NextResponse.next();
   }
   return await auth0.middleware(request);
