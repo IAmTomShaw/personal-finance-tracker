@@ -7,7 +7,7 @@ export const runtime = 'nodejs';
 // GET data
 
 export async function GET() {
-  
+
   // Get the user ID from the session
 
   const session = await auth0.getSession();
@@ -58,7 +58,7 @@ export async function POST (request: NextRequest) {
 
   const body = await request.json();
 
-  await saveUserCloudData(userId, body.accounts, body.balances);
+  await saveUserCloudData(userId, body.accounts, body.balances, body.transactions);
 
   return NextResponse.json(
     { message: 'Cloud data saved successfully' },
