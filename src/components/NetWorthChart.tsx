@@ -59,10 +59,14 @@ export const NetWorthChart: React.FC<NetWorthChartProps> = ({ accounts, balances
       let totalAssets = 0;
       let totalLiabilities = 0;
 
+      // Set time to end of day to ensure we capture all transactions derived today
+      const endOfDayDate = new Date(date);
+      endOfDayDate.setHours(23, 59, 59, 999);
+
       // For each account, get the most recent balance up to this date
       for (const account of accounts) {
         const accountBalances = balances
-          .filter(b => b.accountId === account.id && b.date <= date)
+          .filter(b => b.accountId === account.id && b.date <= endOfDayDate)
           .sort((a, b) => b.date.getTime() - a.date.getTime());
 
         if (accountBalances.length > 0) {

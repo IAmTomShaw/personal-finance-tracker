@@ -13,6 +13,16 @@ export interface Balance {
   date: Date;
 }
 
+export interface Transaction {
+  id: string;
+  accountId?: string;
+  amount: number;
+  date: Date;
+  description: string;
+  category: string;
+  type: 'income' | 'expense';
+}
+
 export interface AccountWithBalance extends Account {
   currentBalance: number;
 }
