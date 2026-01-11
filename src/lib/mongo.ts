@@ -15,7 +15,6 @@ function getClient(): MongoClient {
 }
 
 export async function getUserCloudData(userId: string): Promise<{ accounts: Account[]; balances: Balance[]; transactions?: Transaction[] } | null> {
-export async function getUserCloudData(userId: string): Promise<{ accounts: Account[]; balances: Balance[] } | null> {
   const client = getClient();
   await client.connect();
   const db = client.db(process.env.MONGODB_DB_NAME);
@@ -35,7 +34,6 @@ export async function getUserCloudData(userId: string): Promise<{ accounts: Acco
 }
 
 export async function saveUserCloudData(userId: string, accounts: Account[], balances: Balance[], transactions: Transaction[]): Promise<void> {
-export async function saveUserCloudData(userId: string, accounts: Account[], balances: Balance[]): Promise<void> {
   const client = getClient();
   await client.connect();
   const db = client.db(process.env.MONGODB_DB_NAME);

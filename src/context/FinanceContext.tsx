@@ -326,39 +326,74 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const importData = (jsonData: string): boolean => {
     try {
       const data = JSON.parse(jsonData);
+
+      // Support both legacy format ({ accounts, balances, transactions }) and
+      // current export format ({ accountsExportData, balancesExportData, transactionsExportData }).
+      const rawAccounts = data.accounts ?? data.accountsExportData;
+      const rawBalances = data.balances ?? data.balancesExportData;
       
       // Validate the data structure
-      if (!data.accounts || !data.balances || !Array.isArray(data.accounts) || !Array.isArray(data.balances)) {
+      if (!rawAccounts || !rawBalances || !Array.isArray(rawAccounts) || !Array.isArray(rawBalances)) {
         console.error('Invalid data format: missing accounts or balances arrays');
         return false;
       }
 
-      // Validate accounts structure
-      for (const account of data.accounts) {
-        if (!account.id || !account.name || !account.type || !account.category) {
-          console.error('Invalid account structure:', account);
-          return false;
-        }
+      const isAccountImport = (
+        value: unknown
+      ): value is Omit<Account, 'createdAt'> & { createdAt?: string | Date } => {
+        if (typeof value !== 'object' || value === null) return false;
+        const acc = value as Record<string, unknown>;
+
+        return (
+          typeof acc.id === 'string' &&
+          typeof acc.name === 'string' &&
+          (acc.type === 'asset' || acc.type === 'liability' || acc.type === 'equity') &&
+          typeof acc.category === 'string'
+        );
+      };
+
+      const isBalanceImport = (
+        value: unknown
+      ): value is Omit<Balance, 'date'> & { date: string | Date } => {
+        if (typeof value !== 'object' || value === null) return false;
+        const bal = value as Record<string, unknown>;
+
+        return (
+          typeof bal.id === 'string' &&
+          typeof bal.accountId === 'string' &&
+          typeof bal.amount === 'number' &&
+          (typeof bal.date === 'string' || bal.date instanceof Date)
+        );
+      };
+
+      const importedAccounts: Account[] = rawAccounts
+        .filter(isAccountImport)
+        .map((acc) => ({
+          id: acc.id,
+          name: acc.name,
+          type: acc.type,
+          category: acc.category,
+          createdAt: acc.createdAt ? new Date(acc.createdAt) : new Date(),
+        }));
+
+      const importedBalances: Balance[] = rawBalances
+        .filter(isBalanceImport)
+        .map((bal) => ({
+          id: bal.id,
+          accountId: bal.accountId,
+          amount: bal.amount,
+          date: new Date(bal.date),
+        }));
+
+      if (importedAccounts.length !== rawAccounts.length) {
+        console.error('Invalid account structure in import file');
+        return false;
       }
 
-      // Validate balances structure
-      for (const balance of data.balances) {
-        if (!balance.id || !balance.accountId || typeof balance.amount !== 'number' || !balance.date) {
-          console.error('Invalid balance structure:', balance);
-          return false;
-        }
+      if (importedBalances.length !== rawBalances.length) {
+        console.error('Invalid balance structure in import file');
+        return false;
       }
-
-      // Convert date strings back to Date objects
-      const importedAccounts = data.accounts.map((acc: Partial<Account> & { createdAt: string }) => ({
-        ...acc,
-        createdAt: new Date(acc.createdAt)
-      }));
-
-      const importedBalances = data.balances.map((bal: Partial<Balance> & { date: string }) => ({
-        ...bal,
-        date: new Date(bal.date)
-      }));
 
       // Handle transactions import (optional for backward compatibility)
       let importedTransactions: Transaction[] = [];
