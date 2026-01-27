@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
-import { Account, ACCOUNT_CATEGORIES, ACCOUNT_CATEGORIES_TYPE } from '@/types/finance';
+import { useFinance } from '@/context/FinanceContext';
+import { Account } from '@/types/finance';
 
 interface ManageAccountModalProps {
   account: Account;
@@ -10,21 +10,22 @@ interface ManageAccountModalProps {
 }
 
 export const ManageAccountModal: React.FC<ManageAccountModalProps> = ({ account, onSave, onClose }) => {
+  const { categories } = useFinance();
   const [name, setName] = useState(account.name);
   const [type, setType] = useState<Account['type']>(account.type);
   const [category, setCategory] = useState(account.category);
 
   const categoryOptions = useMemo(() => {
-    const options = (ACCOUNT_CATEGORIES as ACCOUNT_CATEGORIES_TYPE)[type];
+    const options = categories[type];
     return options.includes(category as string) ? options : [...options, category];
-  }, [category, type]);
+  }, [category, type, categories]);
 
   useEffect(() => {
-    const options = (ACCOUNT_CATEGORIES as ACCOUNT_CATEGORIES_TYPE)[type];
-    if (!options.includes(category)) {
+    const options = categories[type];
+    if (options && !options.includes(category) && options.length > 0) {
       setCategory(options[0]);
     }
-  }, [category, type]);
+  }, [category, type, categories]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
