@@ -6,6 +6,7 @@ import { useCurrency } from '@/context/CurrencyContext';
 import { useAuth } from '@/context/AuthContext';
 import { CurrencySelector } from './CurrencySelector';
 import { CloudSyncToggle } from './CloudSyncToggle';
+import CategoryManager from './CategoryManager';
 
 const Settings: React.FC = () => {
   const {
@@ -150,6 +151,9 @@ const Settings: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Category Management */}
+      <CategoryManager />
 
       {/* Data Overview */}
       <div className="bg-gray-50 rounded-lg p-6">

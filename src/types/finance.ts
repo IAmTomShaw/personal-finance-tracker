@@ -29,7 +29,7 @@ export interface ACCOUNT_CATEGORIES_TYPE {
   equity: string[];
 }
 
-export const ACCOUNT_CATEGORIES: ACCOUNT_CATEGORIES_TYPE = {
+export const DEFAULT_ACCOUNT_CATEGORIES: ACCOUNT_CATEGORIES_TYPE = {
   asset: [
     'Cash and Cash Equivalents',
     'Investments',

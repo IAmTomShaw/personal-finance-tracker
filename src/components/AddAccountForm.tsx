@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useFinance } from '@/context/FinanceContext';
-import { AccountType, ACCOUNT_CATEGORIES } from '@/types/finance';
+import { AccountType } from '@/types/finance';
 import { useAnalytics } from '@/hooks/useAnalytics';
 
 interface AddAccountFormProps {
@@ -10,19 +10,26 @@ interface AddAccountFormProps {
 }
 
 export const AddAccountForm: React.FC<AddAccountFormProps> = ({ onSuccess }) => {
-  const { addAccount } = useFinance();
+  const { addAccount, categories } = useFinance();
   const { trackEvent } = useAnalytics();
   const [formData, setFormData] = useState({
     name: '',
     type: 'asset' as AccountType,
-    category: ACCOUNT_CATEGORIES.asset[0] as string,
+    category: '',
   });
+
+  // Initialize category when it is available or when type changes
+  React.useEffect(() => {
+    if (!formData.category && categories[formData.type].length > 0) {
+      setFormData(prev => ({ ...prev, category: categories[prev.type][0] }));
+    }
+  }, [categories, formData.type]);
 
   const handleTypeChange = (newType: AccountType) => {
     setFormData({
       ...formData,
       type: newType,
-      category: ACCOUNT_CATEGORIES[newType][0], // Set default category
+      category: categories[newType][0] || '', // Set default category
     });
   };
 
@@ -46,7 +53,7 @@ export const AddAccountForm: React.FC<AddAccountFormProps> = ({ onSuccess }) => 
     setFormData({
       name: '',
       type: 'asset',
-      category: ACCOUNT_CATEGORIES.asset[0],
+      category: categories.asset[0] || '',
     });
 
     onSuccess?.();
@@ -95,7 +102,7 @@ export const AddAccountForm: React.FC<AddAccountFormProps> = ({ onSuccess }) => 
           onChange={(e) => setFormData({ ...formData, category: e.target.value })}
           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         >
-          {ACCOUNT_CATEGORIES[formData.type].map((category) => (
+          {categories[formData.type].map((category) => (
             <option key={category} value={category}>
               {category}
             </option>

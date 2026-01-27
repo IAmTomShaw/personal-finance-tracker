@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Account, Balance, AccountWithBalance, AccountWithHistory } from '@/types/finance';
+import { Account, Balance, AccountWithBalance, AccountWithHistory, ACCOUNT_CATEGORIES_TYPE, DEFAULT_ACCOUNT_CATEGORIES, AccountType } from '@/types/finance';
 import { allowCloudSync, isCloudSyncAllowed } from '@/lib/offline';
 
 interface FinanceContextType {
@@ -20,6 +20,11 @@ interface FinanceContextType {
   clearAllData: () => void;
   triggerCloudSync: () => Promise<void>;
   triggerRemoveCloudData: () => Promise<void>;
+  // Category Management
+  categories: ACCOUNT_CATEGORIES_TYPE;
+  addCategory: (type: AccountType, name: string) => void;
+  deleteCategory: (type: AccountType, name: string) => void;
+  resetCategories: () => void;
 }
 
 const FinanceContext = createContext<FinanceContextType | undefined>(undefined);
@@ -35,6 +40,7 @@ export const useFinance = () => {
 export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [balances, setBalances] = useState<Balance[]>([]);
+  const [categories, setCategories] = useState<ACCOUNT_CATEGORIES_TYPE>(DEFAULT_ACCOUNT_CATEGORIES);
   const [isLoading, setIsLoading] = useState(true);
 
   // Load data from API on mount
@@ -42,7 +48,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const savedAccounts = localStorage.getItem('finance-accounts');
     const savedBalances = localStorage.getItem('finance-balances');
 
-     if (savedAccounts) {
+    if (savedAccounts) {
       const parsedAccounts = JSON.parse(savedAccounts);
       setAccounts(parsedAccounts.map((acc: Account) => ({
         ...acc,
@@ -57,30 +63,40 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       })));
     }
 
+    const savedCategories = localStorage.getItem('finance-categories');
+    if (savedCategories) {
+      try {
+        setCategories(JSON.parse(savedCategories));
+      } catch (e) {
+        console.error('Failed to parse saved categories, using default', e);
+        setCategories(DEFAULT_ACCOUNT_CATEGORIES);
+      }
+    }
+
     if (!isCloudSyncAllowed()) {
       setIsLoading(false);
       return;
     }
     getUserCloudData()
-        .then((res: { accounts: Account[]; balances: Balance[] } | null) => {
+      .then((res: { accounts: Account[]; balances: Balance[] } | null) => {
 
-          if (res === null) {
-            allowCloudSync(false);
-          } else {
-            setAccounts(res.accounts);
-            setBalances(res.balances.map(b => ({ ...b, date: new Date(b.date) })));
+        if (res === null) {
+          allowCloudSync(false);
+        } else {
+          setAccounts(res.accounts);
+          setBalances(res.balances.map(b => ({ ...b, date: new Date(b.date) })));
 
-            localStorage.setItem('finance-accounts', JSON.stringify(res.accounts));
-            localStorage.setItem('finance-balances', JSON.stringify(res.balances));
-            allowCloudSync(true);
-          }
-        })
-        .catch((error) => {
-          console.error('Error fetching user cloud data:', error);
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
+          localStorage.setItem('finance-accounts', JSON.stringify(res.accounts));
+          localStorage.setItem('finance-balances', JSON.stringify(res.balances));
+          allowCloudSync(true);
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching user cloud data:', error);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   }, []);
 
   const getUserCloudData = async (): Promise<{ accounts: Account[]; balances: Balance[] } | null> => {
@@ -110,7 +126,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       },
       body: JSON.stringify({ accounts, balances }),
     });
-    
+
     if (!response.ok) {
       throw new Error('Failed to save user cloud data');
     }
@@ -126,7 +142,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         'Content-Type': 'application/json',
       },
     });
-    
+
     if (!response.ok) {
       throw new Error('Failed to delete user cloud data');
     }
@@ -142,6 +158,10 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   useEffect(() => {
     localStorage.setItem('finance-balances', JSON.stringify(balances));
   }, [balances]);
+
+  useEffect(() => {
+    localStorage.setItem('finance-categories', JSON.stringify(categories));
+  }, [categories]);
 
   const triggerCloudSync = () => {
     return saveUserCloudData(accounts, balances);
@@ -233,15 +253,15 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       const accountBalances = balances
         .filter(balance => balance.accountId === account.id)
         .sort((a, b) => b.date.getTime() - a.date.getTime());
-      
+
       const currentBalance = accountBalances.length > 0 ? accountBalances[0].amount : 0;
-      
+
       return {
         ...account,
         currentBalance,
       };
     });
-    
+
   };
 
   const deleteAccount = (accountId: string) => {
@@ -253,16 +273,38 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
+  const addCategory = (type: AccountType, name: string) => {
+    if (categories[type].includes(name)) return;
+
+    setCategories(prev => ({
+      ...prev,
+      [type]: [...prev[type], name]
+    }));
+  };
+
+  const deleteCategory = (type: AccountType, name: string) => {
+    setCategories(prev => ({
+      ...prev,
+      [type]: prev[type].filter(c => c !== name)
+    }));
+  };
+
+  const resetCategories = () => {
+    setCategories(DEFAULT_ACCOUNT_CATEGORIES);
+  };
+
   const exportData = (): string => {
-    
+
     const accountsExportData = accounts;
     const balancesExportData = balances;
+    const categoriesExportData = categories;
 
     const exportData = {
-      version: '1.0',
+      version: '1.1',
       exportDate: new Date().toISOString(),
       accountsExportData,
       balancesExportData,
+      categoriesExportData,
     };
     return JSON.stringify(exportData, null, 2);
   };
@@ -270,7 +312,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const importData = (jsonData: string): boolean => {
     try {
       const data = JSON.parse(jsonData);
-      
+
       // Validate the data structure
       if (!data.accounts || !data.balances || !Array.isArray(data.accounts) || !Array.isArray(data.balances)) {
         console.error('Invalid data format: missing accounts or balances arrays');
@@ -308,10 +350,21 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setAccounts(importedAccounts);
       setBalances(importedBalances);
 
+      // Import categories if present (v1.1+)
+      if (data.categoriesExportData) {
+        setCategories(data.categoriesExportData);
+      } else {
+        // Fallback for v1.0 imports: keep existing or reset? 
+        // Let's keep existing to be safe, or we could reset to default.
+        // Actually, if importing a full backup, we might expect categories to reset to default if not provided.
+        // But for backward compatibility with v1.0 backups, let's just stick to defaults.
+        setCategories(DEFAULT_ACCOUNT_CATEGORIES);
+      }
+
       if (isCloudSyncAllowed()) {
 
         saveUserCloudData(importedAccounts, importedBalances);
-        
+
       }
 
       return true;
@@ -324,19 +377,21 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const clearAllData = () => {
     setAccounts([]);
     setBalances([]);
+    setCategories(DEFAULT_ACCOUNT_CATEGORIES);
     localStorage.removeItem('finance-accounts');
     localStorage.removeItem('finance-balances');
+    localStorage.removeItem('finance-categories');
   };
 
   const getAccountsWithHistory = (): AccountWithHistory[] => {
     return accounts.map(account => {
       // Get balances for this account within the date range
       const accountBalances = balances
-        .filter(balance => 
+        .filter(balance =>
           balance.accountId === account.id
         )
         .sort((a, b) => b.date.getTime() - a.date.getTime());
-        
+
       return {
         ...account,
         balanceHistory: accountBalances,
@@ -362,6 +417,10 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         triggerCloudSync,
         triggerRemoveCloudData,
         getAccountsWithHistory,
+        categories,
+        addCategory,
+        deleteCategory,
+        resetCategories,
       }}
     >
       {children}
