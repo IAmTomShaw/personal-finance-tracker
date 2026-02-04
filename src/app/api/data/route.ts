@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json();
 
-  await saveUserCloudData(userId, body.accounts, body.balances);
+  await saveUserCloudData(userId, body.accounts, body.balances, body.transactions);
 
   return NextResponse.json(
     { message: 'Cloud data saved successfully' },

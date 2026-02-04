@@ -2,9 +2,11 @@
 
 import React, { useState } from 'react';
 import { useFinance } from '@/context/FinanceContext';
-import { Account, AccountWithBalance } from '@/types/finance';
+import { Account, AccountWithBalance, Transaction } from '@/types/finance';
 import { useCurrency } from '@/context/CurrencyContext';
 import { CurrencySelector } from './CurrencySelector';
+import { TransactionList } from './TransactionList';
+import { AddTransactionForm } from './AddTransactionForm';
 import WelcomeScreen from './WelcomeScreen';
 import { ManageAccountModal } from './ManageAccountModal';
 
@@ -13,6 +15,9 @@ export const BalanceSheet: React.FC = () => {
   const { formatCurrency } = useCurrency();
   const accountsWithBalances = getAccountsWithBalances();
   const [editingAccount, setEditingAccount] = useState<Account | null>(null);
+  const [activeTab, setActiveTab] = useState<'balances' | 'transactions'>('balances');
+  const [showAddTransaction, setShowAddTransaction] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
 
   const handleSaveAccount = (updates: Pick<Account, 'name' | 'category' | 'type'>) => {
     if (!editingAccount) return;
@@ -125,7 +130,7 @@ export const BalanceSheet: React.FC = () => {
     );
   }
 
-  if (accountsWithBalances.length === 0) {
+  if (accountsWithBalances.length === 0 && activeTab === 'balances') {
     return <WelcomeScreen />;
   }
 
@@ -142,60 +147,126 @@ export const BalanceSheet: React.FC = () => {
         <div className="mb-8 flex justify-end">
           <CurrencySelector size="sm" />
         </div>
-        {groupedAccounts.asset && (
-          <AccountSection
-            title="Assets"
-            accounts={groupedAccounts.asset}
-            total={totalAssets}
-            type="asset"
-          />
-        )}
 
-        {/* Liabilities */}
-        {groupedAccounts.liability && (
-          <AccountSection
-            title="Liabilities"
-            accounts={groupedAccounts.liability}
-            total={totalLiabilities}
-            type="liability"
-          />
-        )}
+        {/* Navigation Tabs */}
+        <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg w-fit mb-8">
+          <button
+            onClick={() => setActiveTab('balances')}
+            className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+              activeTab === 'balances'
+                ? 'bg-white text-blue-600 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            Balances & Accounts
+          </button>
+          <button
+            onClick={() => setActiveTab('transactions')}
+            className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+              activeTab === 'transactions'
+                ? 'bg-white text-blue-600 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            Transactions
+          </button>
+        </div>
 
-        {/* Equity */}
-        {groupedAccounts.equity && (
-          <AccountSection
-            title="Equity"
-            accounts={groupedAccounts.equity}
-            total={totalEquity}
-            type="equity"
-          />
-        )}
+        {activeTab === 'transactions' ? (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-gray-800">Transaction History</h2>
+              <button
+                onClick={() => {
+                  if (showAddTransaction) {
+                    setShowAddTransaction(false);
+                    setEditingTransaction(null);
+                  } else {
+                    setShowAddTransaction(true);
+                    setEditingTransaction(null);
+                  }
+                }}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                {showAddTransaction ? 'Cancel' : 'Add Transaction'}
+              </button>
+            </div>
 
-        {/* Net Worth Summary */}
-        <div className="border-t-2 border-gray-400 pt-6 mt-8">
-          <div className="bg-blue-50 rounded-lg p-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-              <div>
-                <div className="text-sm text-gray-600">Total Assets</div>
-                <div className="text-lg font-bold text-green-600">
-                  {formatCurrency(totalAssets)}
-                </div>
-              </div>
-              <div>
-                <div className="text-sm text-gray-600">Total Liabilities</div>
-                <div className="text-lg font-bold text-red-600">
-                  {formatCurrency(totalLiabilities)}
-                </div>
-              </div>
-              <div>
-                <div className="text-sm text-gray-600">Net Worth</div>
-                <div className={`text-xl font-bold ${netWorth >= 0 ? 'text-green-700' : 'text-red-700'}`}>
-                  {formatCurrency(netWorth)}
+            {showAddTransaction && (
+              <AddTransactionForm 
+                onUiClose={() => {
+                  setShowAddTransaction(false);
+                  setEditingTransaction(null);
+                }}
+                initialData={editingTransaction || undefined}
+              />
+            )}
+
+            <TransactionList 
+              onEdit={(transaction) => {
+                setEditingTransaction(transaction);
+                setShowAddTransaction(true);
+              }}
+            />
+          </div>
+        ) : (
+          <>
+            {groupedAccounts.asset && (
+              <AccountSection
+                title="Assets"
+                accounts={groupedAccounts.asset}
+                total={totalAssets}
+                type="asset"
+              />
+            )}
+
+            {/* Liabilities */}
+            {groupedAccounts.liability && (
+              <AccountSection
+                title="Liabilities"
+                accounts={groupedAccounts.liability}
+                total={totalLiabilities}
+                type="liability"
+              />
+            )}
+
+            {/* Equity */}
+            {groupedAccounts.equity && (
+              <AccountSection
+                title="Equity"
+                accounts={groupedAccounts.equity}
+                total={totalEquity}
+                type="equity"
+              />
+            )}
+
+            {/* Net Worth Summary */}
+            <div className="border-t-2 border-gray-400 pt-6 mt-8">
+              <div className="bg-blue-50 rounded-lg p-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                  <div>
+                    <div className="text-sm text-gray-600">Total Assets</div>
+                    <div className="text-lg font-bold text-green-600">
+                      {formatCurrency(totalAssets)}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-600">Total Liabilities</div>
+                    <div className="text-lg font-bold text-red-600">
+                      {formatCurrency(totalLiabilities)}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-600">Net Worth</div>
+                    <div className={`text-xl font-bold ${netWorth >= 0 ? 'text-green-700' : 'text-red-700'}`}>
+                      {formatCurrency(netWorth)}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+          </>
+        )}
       </div>
 
       {editingAccount && (

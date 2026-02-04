@@ -6,9 +6,10 @@ import { BalanceChart } from './BalanceChart';
 import { NetWorthChart } from './NetWorthChart';
 import { useCurrency } from '@/context/CurrencyContext';
 import { CurrencySelector } from './CurrencySelector';
+import { buildSyntheticBalancesForCharts } from '@/lib/balance-history';
 
 export const HistoricalTracking: React.FC = () => {
-  const { accounts, balances, isLoading } = useFinance();
+  const { accounts, balances, transactions, isLoading } = useFinance();
   const { formatCurrency } = useCurrency();
   const [selectedAccount, setSelectedAccount] = useState<string>('all');
   const [dateRange, setDateRange] = useState<'7d' | '30d' | '90d' | '1y' | 'all'>('30d');
@@ -35,20 +36,21 @@ export const HistoricalTracking: React.FC = () => {
     }
   };
 
-  const filteredBalances = useMemo(() => {
-    const dateFilter = getDateRangeFilter(dateRange);
-    return balances.filter(balance => new Date(balance.date).getTime() >= dateFilter.getTime());
-  }, [balances, dateRange]);
+  const dateFilter = useMemo(() => getDateRangeFilter(dateRange), [dateRange]);
+
+  const chartBalances = useMemo(() => {
+    return buildSyntheticBalancesForCharts(accounts, balances, transactions, dateFilter);
+  }, [accounts, balances, transactions, dateFilter]);
 
   const accountsWithHistory = useMemo(() => {
     const toReturn = accounts.filter(account => 
-      filteredBalances.some(balance => balance.accountId === account.id)
+      chartBalances.some(balance => balance.accountId === account.id)
     );
     return toReturn;
-  }, [accounts, filteredBalances]);
+  }, [accounts, chartBalances]);
 
   const getAccountBalanceHistory = (accountId: string) => {
-    return filteredBalances
+    return chartBalances
       .filter(balance => balance.accountId === accountId)
       .sort((a, b) => a.date.getTime() - b.date.getTime());
   };
@@ -176,7 +178,7 @@ export const HistoricalTracking: React.FC = () => {
             <div className="mb-8">
               <NetWorthChart 
                 accounts={accounts}
-                balances={filteredBalances}
+                balances={chartBalances}
                 height={400}
               />
             </div>
@@ -219,7 +221,7 @@ export const HistoricalTracking: React.FC = () => {
                 <div key={account.id} className="border rounded-lg p-4">
                   <BalanceChart 
                     account={account} 
-                    balances={filteredBalances}
+                    balances={chartBalances}
                     height={300}
                   />
                 </div>
@@ -231,7 +233,7 @@ export const HistoricalTracking: React.FC = () => {
             <div>
               <BalanceChart 
                 account={selectedAccountData} 
-                balances={filteredBalances}
+                balances={chartBalances}
                 height={500}
               />
               

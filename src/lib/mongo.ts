@@ -1,4 +1,4 @@
-import { Account, Balance } from "@/types/finance";
+import { Account, Balance, Transaction } from "@/types/finance";
 import { MongoClient } from "mongodb";
 
 let client: MongoClient | null = null;
@@ -14,11 +14,11 @@ function getClient(): MongoClient {
   return client;
 }
 
-export async function getUserCloudData(userId: string): Promise<{ accounts: Account[]; balances: Balance[] } | null> {
+export async function getUserCloudData(userId: string): Promise<{ accounts: Account[]; balances: Balance[]; transactions?: Transaction[] } | null> {
   const client = getClient();
   await client.connect();
   const db = client.db(process.env.MONGODB_DB_NAME);
-  const userCollection = db.collection<{ userId: string; accounts: Account[]; balances: Balance[] }>("user_data");
+  const userCollection = db.collection<{ userId: string; accounts: Account[]; balances: Balance[]; transactions?: Transaction[] }>("user_data");
 
   const userData = await userCollection.findOne({ userId });
 
@@ -29,28 +29,28 @@ export async function getUserCloudData(userId: string): Promise<{ accounts: Acco
   return {
     accounts: userData.accounts || [],
     balances: userData.balances || [],
+    transactions: userData.transactions || [],
   };
 }
 
-export async function saveUserCloudData(userId: string, accounts: Account[], balances: Balance[]): Promise<void> {
+export async function saveUserCloudData(userId: string, accounts: Account[], balances: Balance[], transactions: Transaction[]): Promise<void> {
   const client = getClient();
   await client.connect();
   const db = client.db(process.env.MONGODB_DB_NAME);
-  const userCollection = db.collection<{ userId: string; accounts: Account[]; balances: Balance[] }>("user_data");
+  const userCollection = db.collection<{ userId: string; accounts: Account[]; balances: Balance[]; transactions?: Transaction[] }>("user_data");
 
   await userCollection.updateOne(
     { userId },
-    { $set: { accounts, balances } },
+    { $set: { accounts, balances, transactions } },
     { upsert: true }
   );
 }
-
 
 export async function deleteUserCloudData(userId: string): Promise<void> {
   const client = getClient();
   await client.connect();
   const db = client.db(process.env.MONGODB_DB_NAME);
-  const userCollection = db.collection<{ userId: string; accounts: Account[]; balances: Balance[] }>("user_data");
+  const userCollection = db.collection<{ userId: string; accounts: Account[]; balances: Balance[]; transactions?: Transaction[] }>("user_data");
 
   await userCollection.deleteOne({ userId });
 }
