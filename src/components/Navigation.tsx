@@ -19,6 +19,7 @@ const Navigation: React.FC = () => {
     { href: '/', label: 'Balance Sheet', icon: '📊' },
     { href: '/add-account', label: 'Add Account', icon: '➕' },
     { href: '/record-balances', label: 'Record Balances', icon: '💰' },
+    { href: '/bank-statements', label: 'Bank Statements', icon: '🏦' },
     { href: '/historical', label: 'Historical Tracking', icon: '📈' },
   ];
 

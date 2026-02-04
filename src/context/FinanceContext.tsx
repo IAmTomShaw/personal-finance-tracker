@@ -11,6 +11,7 @@ interface FinanceContextType {
   addAccount: (account: Omit<Account, 'id' | 'createdAt'>) => void;
   updateBalance: (accountId: string, amount: number) => void;
   updateMultipleBalances: (updates: { accountId: string; amount: number }[], date?: Date, replaceExisting?: boolean) => void;
+  importBalances: (entries: { accountId: string; amount: number; date: Date }[], replaceExisting?: boolean) => void;
   getAccountsWithBalances: () => AccountWithBalance[];
   getAccountsWithHistory: () => AccountWithHistory[];
   deleteAccount: (accountId: string) => void;
@@ -227,6 +228,41 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     });
   };
 
+  const importBalances = (
+    entries: { accountId: string; amount: number; date: Date }[],
+    replaceExisting: boolean = false
+  ) => {
+    if (entries.length === 0) return;
+
+    setBalances(prev => {
+      let updatedPrev = prev;
+
+      if (replaceExisting) {
+        const dateKeys = new Set(
+          entries.map(entry => `${entry.accountId}|${entry.date.toISOString().split('T')[0]}`)
+        );
+        updatedPrev = prev.filter(
+          balance => !dateKeys.has(`${balance.accountId}|${balance.date.toISOString().split('T')[0]}`)
+        );
+      }
+
+      const newBalances = entries.map(entry => ({
+        id: crypto.randomUUID(),
+        accountId: entry.accountId,
+        amount: entry.amount,
+        date: entry.date,
+      }));
+
+      const mergedBalances = [...updatedPrev, ...newBalances];
+
+      if (isCloudSyncAllowed()) {
+        saveUserCloudData(accounts, mergedBalances);
+      }
+
+      return mergedBalances;
+    });
+  };
+
   const getAccountsWithBalances = (): AccountWithBalance[] => {
     return accounts.map(account => {
       // Get the most recent balance for this account
@@ -353,6 +389,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         addAccount,
         updateBalance,
         updateMultipleBalances,
+        importBalances,
         getAccountsWithBalances,
         updateAccount,
         deleteAccount,
