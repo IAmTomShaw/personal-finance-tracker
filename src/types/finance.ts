@@ -56,7 +56,6 @@ export interface RecurringTransaction {
   amount: number;
   type: 'income' | 'expense';
   frequency: 'daily' | 'weekly' | 'bi-weekly' | 'monthly' | 'annually';
-  // Legacy: dayOfMonth, monthOfYear kept for migration; new records omit these
   dayOfMonth?: number;
   monthOfYear?: number;
   startDate: Date;

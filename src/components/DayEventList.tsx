@@ -19,7 +19,6 @@ const FREQUENCY_LABELS: Record<string, string> = {
   'bi-weekly': 'Bi-weekly',
   monthly: 'Monthly',
   annually: 'Annually',
-  // Legacy
   yearly: 'Annually',
 };
 
@@ -67,7 +66,7 @@ const DayEventList: React.FC<DayEventListProps> = ({
                   <div className="min-w-0">
                     <p className="font-medium text-gray-800 truncate">{tx.name}</p>
                     <p className="text-xs text-gray-500 mt-0.5">
-                      {tx.category} &middot; {FREQUENCY_LABELS[tx.frequency ?? (tx as { recurrence?: string }).recurrence ?? 'monthly']}
+                      {tx.category} &middot; {FREQUENCY_LABELS[tx.frequency ?? 'monthly']}
                     </p>
                   </div>
                 </div>
