@@ -45,7 +45,8 @@ input[type="search"]::placeholder,
 input[type="tel"]::placeholder,
 input[type="url"]::placeholder,
 textarea::placeholder {
-  color: #6b7280 !important; /* gray-500 */
+  color: #6b7280 !important;
+  /* gray-500 */
   opacity: 1 !important;
 }
 
@@ -58,7 +59,8 @@ textarea::placeholder {
 .dark input[type="tel"]::placeholder,
 .dark input[type="url"]::placeholder,
 .dark textarea::placeholder {
-  color: #9ca3af !important; /* gray-400 */
+  color: #9ca3af !important;
+  /* gray-400 */
   opacity: 1 !important;
 }
 
@@ -141,16 +143,19 @@ textarea::-ms-input-placeholder {
 
 /* Select styling for better consistency */
 select {
-  color: #374151; /* gray-700 for better readability */
+  color: #374151;
+  /* gray-700 for better readability */
 }
 
 .dark select {
-  color: #e5e7eb; /* gray-200 */
+  color: #e5e7eb;
+  /* gray-200 */
 }
 
 /* Style select when no option is selected (acts like placeholder) */
 select:invalid {
-  color: #6b7280; /* gray-500 to match placeholder color */
+  color: #6b7280;
+  /* gray-500 to match placeholder color */
 }
 
 .dark select:invalid {
@@ -187,7 +192,8 @@ input[type="search"],
 input[type="tel"],
 input[type="url"],
 textarea {
-  color: #1f2937 !important; /* gray-800 for better contrast */
+  color: #1f2937 !important;
+  /* gray-800 for better contrast */
 }
 
 .dark input[type="number"],
@@ -201,14 +207,17 @@ textarea {
 .dark input[type="tel"],
 .dark input[type="url"],
 .dark textarea {
-  color: #f3f4f6 !important; /* gray-100 */
+  color: #f3f4f6 !important;
+  /* gray-100 */
 }
 
 /* Ensure input text is dark and readable */
 input:not(:placeholder-shown) {
-  color: #1f2937 !important; /* gray-800 when input has value */
+  color: #1f2937 !important;
+  /* gray-800 when input has value */
 }
 
 .dark input:not(:placeholder-shown) {
-  color: #f3f4f6 !important; /* gray-100 */
+  color: #f3f4f6 !important;
+  /* gray-100 */
 }
