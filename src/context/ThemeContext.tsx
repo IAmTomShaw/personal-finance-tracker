@@ -25,6 +25,10 @@ function getSystemTheme(): 'light' | 'dark' {
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
 
+function isValidTheme(theme: unknown): theme is Theme {
+    return typeof theme === 'string' && ['light', 'dark', 'system'].includes(theme);
+}
+
 function applyTheme(theme: Theme) {
     const resolved = theme === 'system' ? getSystemTheme() : theme;
     const root = document.documentElement;
@@ -44,8 +48,16 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
 
     // Load saved theme on mount
     useEffect(() => {
-        const saved = localStorage.getItem('finance-theme') as Theme | null;
-        const initial = saved || 'system';
+        let initial: Theme = 'system';
+        try {
+            const saved = localStorage.getItem('finance-theme');
+            if (saved && isValidTheme(saved)) {
+                initial = saved;
+            }
+        } catch (error) {
+            console.error('Failed to load theme from localStorage:', error);
+        }
+
         setThemeState(initial);
         const resolved = applyTheme(initial);
         setResolvedTheme(resolved);
@@ -69,11 +81,13 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     // Sync across tabs
     useEffect(() => {
         const handleStorage = (e: StorageEvent) => {
-            if (e.key === 'finance-theme' && e.newValue) {
-                const newTheme = e.newValue as Theme;
-                setThemeState(newTheme);
-                const resolved = applyTheme(newTheme);
-                setResolvedTheme(resolved);
+            if (e.key === 'finance-theme') {
+                const newTheme = (e.newValue as Theme) || 'system';
+                if (isValidTheme(newTheme)) {
+                    setThemeState(newTheme);
+                    const resolved = applyTheme(newTheme);
+                    setResolvedTheme(resolved);
+                }
             }
         };
 
@@ -83,7 +97,11 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
 
     const setTheme = useCallback((newTheme: Theme) => {
         setThemeState(newTheme);
-        localStorage.setItem('finance-theme', newTheme);
+        try {
+            localStorage.setItem('finance-theme', newTheme);
+        } catch (error) {
+            console.error('Failed to save theme to localStorage:', error);
+        }
         const resolved = applyTheme(newTheme);
         setResolvedTheme(resolved);
     }, []);

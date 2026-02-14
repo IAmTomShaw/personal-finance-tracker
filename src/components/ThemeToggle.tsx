@@ -34,6 +34,7 @@ export const ThemeToggle = ({ className = '' }: ThemeToggleProps) => {
 
     return (
         <button
+            type="button"
             onClick={cycleTheme}
             className={`flex items-center space-x-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors
         text-gray-600 hover:text-gray-900 hover:bg-gray-100
