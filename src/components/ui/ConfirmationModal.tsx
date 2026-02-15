@@ -60,6 +60,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                 setIsRendered(false);
                 setChallengeValue('');
             }, 300);
+            document.body.style.overflow = 'unset';
 
             // Restore focus
             if (previousFocusRef.current) {
