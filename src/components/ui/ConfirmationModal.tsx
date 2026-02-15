@@ -35,7 +35,6 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             previousFocusRef.current = document.activeElement as HTMLElement;
             setIsRendered(true);
 
-            // Increment modal counter or just set hidden
             const originalOverflow = document.body.style.overflow;
             document.body.style.overflow = 'hidden';
 
@@ -51,7 +50,6 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 
             return () => {
                 clearTimeout(timer);
-                // Check if other modals are still open before unsetting
                 const otherModals = document.querySelectorAll('[role="dialog"]').length;
                 if (otherModals <= 1) {
                     document.body.style.overflow = originalOverflow === 'hidden' ? '' : originalOverflow;
@@ -60,7 +58,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
         } else {
             const timer = setTimeout(() => {
                 setIsRendered(false);
-                setChallengeValue(''); // Reset challenge when closed
+                setChallengeValue('');
             }, 300);
 
             // Restore focus
@@ -197,14 +195,14 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                         }}
                         disabled={isConfirmDisabled}
                         aria-label={`${confirmText} ${title}`}
-                        className={`flex-[2] py-4 rounded-2xl font-bold text-lg transition-all active:scale-[0.98] disabled:opacity-30 disabled:grayscale disabled:cursor-not-allowed ${styles.button}`}
+                        className={`flex-[2] py-4 rounded-2xl font-bold text-lg transition-all active:scale-[0.98] cursor-pointer disabled:opacity-30 disabled:grayscale disabled:cursor-not-allowed ${styles.button}`}
                     >
                         {confirmText}
                     </button>
                     <button
                         onClick={onClose}
                         aria-label={`${cancelText} ${title}`}
-                        className="flex-1 py-4 rounded-2xl font-bold text-lg bg-gray-100 dark:bg-neutral-700 text-gray-600 dark:text-neutral-300 hover:bg-gray-200 dark:hover:bg-neutral-600 transition-all active:scale-[0.98]"
+                        className="flex-1 py-4 rounded-2xl font-bold text-lg bg-gray-100 dark:bg-neutral-700 text-gray-600 dark:text-neutral-300 hover:bg-gray-200 dark:hover:bg-neutral-600 cursor-pointer transition-all active:scale-[0.98]"
                     >
                         {cancelText}
                     </button>
