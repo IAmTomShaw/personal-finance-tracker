@@ -26,6 +26,7 @@ interface CalendarGridProps {
 }
 
 const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const WEEKDAY_LABELS_SHORT = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
 const CalendarGrid: React.FC<CalendarGridProps> = ({
   currentDate,
@@ -51,8 +52,8 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-        <div className="flex items-center space-x-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 sm:px-6 py-4 border-b border-gray-200">
+        <div className="flex items-center justify-between sm:justify-start space-x-4">
           <button
             onClick={handlePrevMonth}
             className="p-2 rounded-md hover:bg-gray-100 text-gray-600 hover:text-gray-800 transition-colors"
@@ -62,7 +63,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <h2 className="text-lg font-semibold text-gray-800 min-w-[180px] text-center">
+          <h2 className="text-base sm:text-lg font-semibold text-gray-800 min-w-[140px] sm:min-w-[180px] text-center">
             {format(currentDate, 'MMMM yyyy')}
           </h2>
           <button
@@ -77,7 +78,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
         </div>
         <button
           onClick={onAddEvent}
-          className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+          className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
         >
           + Add Transaction
         </button>
@@ -85,12 +86,13 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
 
       {/* Weekday headers */}
       <div className="grid grid-cols-7 border-b border-gray-200">
-        {WEEKDAY_LABELS.map((label) => (
+        {WEEKDAY_LABELS.map((label, idx) => (
           <div
             key={label}
-            className="px-2 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider"
+            className="px-1 sm:px-2 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider"
           >
-            {label}
+            <span className="sm:hidden">{WEEKDAY_LABELS_SHORT[idx]}</span>
+            <span className="hidden sm:inline">{label}</span>
           </div>
         ))}
       </div>
@@ -109,7 +111,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
               key={key}
               onClick={() => onSelectDate(day)}
               className={`
-                relative min-h-[80px] p-2 border-b border-r border-gray-100 text-left
+                relative min-h-[60px] sm:min-h-[80px] p-1 sm:p-2 border-b border-r border-gray-100 text-left
                 transition-colors hover:bg-blue-50 focus:outline-none focus:ring-1 focus:ring-inset focus:ring-blue-500
                 ${!isCurrentMonth ? 'bg-gray-50' : 'bg-white'}
                 ${isSelected ? 'ring-2 ring-inset ring-blue-500 bg-blue-50' : ''}
@@ -132,7 +134,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                   {dayOccurrences.slice(0, 3).map((occ, idx) => (
                     <div
                       key={`${occ.transaction.id}-${idx}`}
-                      className="flex items-center text-xs leading-tight truncate rounded px-1 py-0.5"
+                      className="flex items-center text-[10px] sm:text-xs leading-tight truncate rounded px-1 py-0.5"
                       style={{
                         backgroundColor: `${occ.transaction.color || CALENDAR_COLORS[occ.transaction.category] || '#6b7280'}20`,
                         color: occ.transaction.color || CALENDAR_COLORS[occ.transaction.category] || '#6b7280',

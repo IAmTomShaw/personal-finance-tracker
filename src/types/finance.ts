@@ -55,10 +55,10 @@ export interface RecurringTransaction {
   name: string;
   amount: number;
   type: 'income' | 'expense';
-  recurrence: 'weekly' | 'monthly' | 'yearly';
-  dayOfMonth?: number;    // 1-31 for monthly
-  dayOfWeek?: number;     // 0-6 for weekly (Sun-Sat)
-  monthOfYear?: number;   // 0-11 for yearly
+  frequency: 'daily' | 'weekly' | 'bi-weekly' | 'monthly' | 'annually';
+  // Legacy: dayOfMonth, monthOfYear kept for migration; new records omit these
+  dayOfMonth?: number;
+  monthOfYear?: number;
   startDate: Date;
   endDate?: Date;
   category: string;

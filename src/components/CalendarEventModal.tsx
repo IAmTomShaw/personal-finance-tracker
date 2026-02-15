@@ -10,12 +10,6 @@ interface CalendarEventModalProps {
   onClose: () => void;
 }
 
-const WEEKDAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
-];
-
 const CalendarEventModal: React.FC<CalendarEventModalProps> = ({ transaction, onSave, onClose }) => {
   const { selectedCurrency } = useCurrency();
   const isEditing = !!transaction;
@@ -23,12 +17,9 @@ const CalendarEventModal: React.FC<CalendarEventModalProps> = ({ transaction, on
   const [name, setName] = useState(transaction?.name ?? '');
   const [amount, setAmount] = useState(transaction?.amount?.toString() ?? '');
   const [type, setType] = useState<'income' | 'expense'>(transaction?.type ?? 'expense');
-  const [recurrence, setRecurrence] = useState<'weekly' | 'monthly' | 'yearly'>(
-    transaction?.recurrence ?? 'monthly'
+  const [frequency, setFrequency] = useState<RecurringTransaction['frequency']>(
+    transaction?.frequency ?? 'monthly'
   );
-  const [dayOfMonth, setDayOfMonth] = useState(transaction?.dayOfMonth ?? 1);
-  const [dayOfWeek, setDayOfWeek] = useState(transaction?.dayOfWeek ?? 0);
-  const [monthOfYear, setMonthOfYear] = useState(transaction?.monthOfYear ?? 0);
   const [category, setCategory] = useState(transaction?.category ?? CALENDAR_CATEGORIES[0]);
   const [color, setColor] = useState(transaction?.color ?? '');
   const [startDate, setStartDate] = useState(
@@ -56,10 +47,7 @@ const CalendarEventModal: React.FC<CalendarEventModalProps> = ({ transaction, on
       name: trimmedName,
       amount: parseFloat(amount),
       type,
-      recurrence,
-      dayOfMonth: recurrence === 'monthly' || recurrence === 'yearly' ? dayOfMonth : undefined,
-      dayOfWeek: recurrence === 'weekly' ? dayOfWeek : undefined,
-      monthOfYear: recurrence === 'yearly' ? monthOfYear : undefined,
+      frequency,
       startDate: new Date(startDate),
       endDate: endDate ? new Date(endDate) : undefined,
       category,
@@ -158,102 +146,24 @@ const CalendarEventModal: React.FC<CalendarEventModalProps> = ({ transaction, on
             </select>
           </div>
 
-          {/* Recurrence */}
+          {/* Frequency */}
           <div>
-            <label htmlFor="event-recurrence" className="block text-sm font-medium text-gray-700 mb-1">
-              Recurrence
+            <label htmlFor="event-frequency" className="block text-sm font-medium text-gray-700 mb-1">
+              Frequency
             </label>
             <select
-              id="event-recurrence"
-              value={recurrence}
-              onChange={(e) => setRecurrence(e.target.value as 'weekly' | 'monthly' | 'yearly')}
+              id="event-frequency"
+              value={frequency}
+              onChange={(e) => setFrequency(e.target.value as RecurringTransaction['frequency'])}
               className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
+              <option value="daily">Daily</option>
               <option value="weekly">Weekly</option>
+              <option value="bi-weekly">Bi-weekly</option>
               <option value="monthly">Monthly</option>
-              <option value="yearly">Yearly</option>
+              <option value="annually">Annually</option>
             </select>
           </div>
-
-          {/* Day selection based on recurrence */}
-          {recurrence === 'weekly' && (
-            <div>
-              <label htmlFor="event-day-of-week" className="block text-sm font-medium text-gray-700 mb-1">
-                Day of Week
-              </label>
-              <select
-                id="event-day-of-week"
-                value={dayOfWeek}
-                onChange={(e) => setDayOfWeek(parseInt(e.target.value))}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                {WEEKDAY_NAMES.map((name, idx) => (
-                  <option key={idx} value={idx}>
-                    {name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {recurrence === 'monthly' && (
-            <div>
-              <label htmlFor="event-day-of-month" className="block text-sm font-medium text-gray-700 mb-1">
-                Day of Month
-              </label>
-              <select
-                id="event-day-of-month"
-                value={dayOfMonth}
-                onChange={(e) => setDayOfMonth(parseInt(e.target.value))}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
-                  <option key={d} value={d}>
-                    {d}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {recurrence === 'yearly' && (
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label htmlFor="event-month-of-year" className="block text-sm font-medium text-gray-700 mb-1">
-                  Month
-                </label>
-                <select
-                  id="event-month-of-year"
-                  value={monthOfYear}
-                  onChange={(e) => setMonthOfYear(parseInt(e.target.value))}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  {MONTH_NAMES.map((name, idx) => (
-                    <option key={idx} value={idx}>
-                      {name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label htmlFor="event-yearly-day" className="block text-sm font-medium text-gray-700 mb-1">
-                  Day
-                </label>
-                <select
-                  id="event-yearly-day"
-                  value={dayOfMonth}
-                  onChange={(e) => setDayOfMonth(parseInt(e.target.value))}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
-                    <option key={d} value={d}>
-                      {d}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          )}
 
           {/* Start / End Dates */}
           <div className="grid grid-cols-2 gap-3">
@@ -269,6 +179,9 @@ const CalendarEventModal: React.FC<CalendarEventModalProps> = ({ transaction, on
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 required
               />
+              <p className="text-xs text-gray-500 mt-1">
+                The schedule is based on your start date (e.g. monthly = same day each month)
+              </p>
             </div>
             <div>
               <label htmlFor="event-end-date" className="block text-sm font-medium text-gray-700 mb-1">

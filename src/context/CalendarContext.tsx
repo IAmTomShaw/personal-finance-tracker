@@ -14,6 +14,7 @@ import {
   isBefore,
   isSameDay,
   startOfDay,
+  differenceInDays,
 } from 'date-fns';
 
 export interface CalendarOccurrence {
@@ -40,6 +41,22 @@ export const useCalendar = () => {
   return context;
 };
 
+function migrateTransaction(t: RecurringTransaction & { recurrence?: string }): RecurringTransaction {
+  const startDate = new Date(t.startDate);
+  const endDate = t.endDate ? new Date(t.endDate) : undefined;
+  const createdAt = new Date(t.createdAt);
+
+  const frequency = t.frequency ?? (t.recurrence === 'yearly' ? 'annually' : (t.recurrence === 'weekly' || t.recurrence === 'monthly' ? t.recurrence : 'monthly'));
+
+  return {
+    ...t,
+    frequency: frequency as RecurringTransaction['frequency'],
+    startDate,
+    endDate,
+    createdAt,
+  };
+}
+
 export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [recurringTransactions, setRecurringTransactions] = useState<RecurringTransaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -49,14 +66,7 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const saved = localStorage.getItem('finance-calendar');
     if (saved) {
       const parsed = JSON.parse(saved);
-      setRecurringTransactions(
-        parsed.map((t: RecurringTransaction) => ({
-          ...t,
-          startDate: new Date(t.startDate),
-          endDate: t.endDate ? new Date(t.endDate) : undefined,
-          createdAt: new Date(t.createdAt),
-        }))
-      );
+      setRecurringTransactions(parsed.map((t: RecurringTransaction & { recurrence?: string }) => migrateTransaction(t)));
     }
 
     if (!isCloudSyncAllowed()) {
@@ -75,12 +85,7 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       })
       .then((data) => {
         if (data?.calendarEvents && Array.isArray(data.calendarEvents)) {
-          const events = data.calendarEvents.map((t: RecurringTransaction) => ({
-            ...t,
-            startDate: new Date(t.startDate),
-            endDate: t.endDate ? new Date(t.endDate) : undefined,
-            createdAt: new Date(t.createdAt),
-          }));
+          const events = data.calendarEvents.map((t: RecurringTransaction & { recurrence?: string }) => migrateTransaction(t));
           setRecurringTransactions(events);
           localStorage.setItem('finance-calendar', JSON.stringify(events));
         }
@@ -144,38 +149,44 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const monthEnd = endOfMonth(new Date(year, month));
       const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
-      // Map keyed by ISO date string (YYYY-MM-DD)
       const occurrences = new Map<string, CalendarOccurrence[]>();
 
       for (const transaction of recurringTransactions) {
         const txStart = startOfDay(new Date(transaction.startDate));
         const txEnd = transaction.endDate ? startOfDay(new Date(transaction.endDate)) : null;
 
+        const startDayOfWeek = getDay(txStart);
+        const startDayOfMonth = transaction.dayOfMonth ?? getDate(txStart);
+        const startMonthOfYear = transaction.monthOfYear ?? getMonth(txStart);
+
         for (const day of daysInMonth) {
-          // Skip if before start date or after end date
           if (isBefore(day, txStart) && !isSameDay(day, txStart)) continue;
           if (txEnd && isAfter(day, txEnd) && !isSameDay(day, txEnd)) continue;
 
           let matches = false;
 
-          switch (transaction.recurrence) {
+          switch (transaction.frequency) {
+            case 'daily':
+              matches = true;
+              break;
             case 'weekly':
-              if (getDay(day) === (transaction.dayOfWeek ?? 0)) {
-                matches = true;
-              }
+              matches = getDay(day) === startDayOfWeek;
               break;
-            case 'monthly':
-              if (getDate(day) === (transaction.dayOfMonth ?? 1)) {
-                matches = true;
-              }
+            case 'bi-weekly': {
+              const diff = differenceInDays(day, txStart);
+              matches = diff >= 0 && diff % 14 === 0;
               break;
-            case 'yearly':
-              if (
-                getMonth(day) === (transaction.monthOfYear ?? 0) &&
-                getDate(day) === (transaction.dayOfMonth ?? 1)
-              ) {
-                matches = true;
-              }
+            }
+            case 'monthly': {
+              const lastDay = getDate(monthEnd);
+              const targetDay = Math.min(startDayOfMonth, lastDay);
+              matches = getDate(day) === targetDay;
+              break;
+            }
+            case 'annually':
+              matches =
+                getMonth(day) === startMonthOfYear &&
+                getDate(day) === Math.min(startDayOfMonth, getDate(monthEnd));
               break;
           }
 

@@ -13,10 +13,14 @@ interface DayEventListProps {
   onDelete: (transactionId: string) => void;
 }
 
-const RECURRENCE_LABELS: Record<string, string> = {
+const FREQUENCY_LABELS: Record<string, string> = {
+  daily: 'Daily',
   weekly: 'Weekly',
+  'bi-weekly': 'Bi-weekly',
   monthly: 'Monthly',
-  yearly: 'Yearly',
+  annually: 'Annually',
+  // Legacy
+  yearly: 'Annually',
 };
 
 const DayEventList: React.FC<DayEventListProps> = ({
@@ -29,14 +33,14 @@ const DayEventList: React.FC<DayEventListProps> = ({
 
   if (!selectedDate) {
     return (
-      <div className="bg-white rounded-lg shadow-lg p-6">
+      <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
         <p className="text-gray-500 text-center">Select a day on the calendar to see its transactions.</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6">
+    <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
       <h3 className="text-lg font-semibold text-gray-800 mb-4">
         {format(selectedDate, 'EEEE, MMMM d, yyyy')}
       </h3>
@@ -53,22 +57,22 @@ const DayEventList: React.FC<DayEventListProps> = ({
             return (
               <div
                 key={tx.id}
-                className="flex items-start justify-between p-3 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors"
+                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors"
               >
                 <div className="flex items-start space-x-3 min-w-0">
                   <div
-                    className="w-3 h-3 rounded-full mt-1.5 flex-shrink-0"
+                    className="w-3 h-3 rounded-full mt-1.5 shrink-0"
                     style={{ backgroundColor: txColor }}
                   />
                   <div className="min-w-0">
                     <p className="font-medium text-gray-800 truncate">{tx.name}</p>
                     <p className="text-xs text-gray-500 mt-0.5">
-                      {tx.category} &middot; {RECURRENCE_LABELS[tx.recurrence]}
+                      {tx.category} &middot; {FREQUENCY_LABELS[tx.frequency ?? (tx as { recurrence?: string }).recurrence ?? 'monthly']}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-3 flex-shrink-0 ml-3">
+                <div className="flex items-center space-x-3 shrink-0 sm:ml-3">
                   <span
                     className={`text-sm font-semibold ${isIncome ? 'text-green-600' : 'text-red-600'}`}
                   >
@@ -78,7 +82,7 @@ const DayEventList: React.FC<DayEventListProps> = ({
                   <div className="flex items-center space-x-1">
                     <button
                       onClick={() => onEdit(tx.id)}
-                      className="p-1 rounded text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                      className="p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
                       aria-label={`Edit ${tx.name}`}
                       title="Edit"
                     >
@@ -93,7 +97,7 @@ const DayEventList: React.FC<DayEventListProps> = ({
                     </button>
                     <button
                       onClick={() => onDelete(tx.id)}
-                      className="p-1 rounded text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                      className="p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
                       aria-label={`Delete ${tx.name}`}
                       title="Delete"
                     >

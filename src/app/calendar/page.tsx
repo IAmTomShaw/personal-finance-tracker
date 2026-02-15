@@ -102,32 +102,32 @@ export default function CalendarPage() {
   return (
     <ProtectedRoute>
       <ClientOnly>
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
           {/* Page header */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">Finance Calendar</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Finance Calendar</h1>
             <p className="text-gray-600">
               Visualise your recurring transactions at a glance
             </p>
           </div>
 
           {/* Monthly summary cards */}
-          <div className="grid grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
             <div className="bg-white rounded-lg shadow p-4 text-center">
               <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Monthly Income</p>
-              <p className="text-lg font-bold text-green-600 mt-1">
+              <p className="text-base sm:text-lg font-bold text-green-600 mt-1">
                 {formatCurrency(monthlySummary.income)}
               </p>
             </div>
             <div className="bg-white rounded-lg shadow p-4 text-center">
               <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Monthly Expenses</p>
-              <p className="text-lg font-bold text-red-600 mt-1">
+              <p className="text-base sm:text-lg font-bold text-red-600 mt-1">
                 {formatCurrency(monthlySummary.expenses)}
               </p>
             </div>
             <div className="bg-white rounded-lg shadow p-4 text-center">
               <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Net</p>
-              <p className={`text-lg font-bold mt-1 ${monthlySummary.net >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              <p className={`text-base sm:text-lg font-bold mt-1 ${monthlySummary.net >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {formatCurrency(monthlySummary.net)}
               </p>
             </div>
