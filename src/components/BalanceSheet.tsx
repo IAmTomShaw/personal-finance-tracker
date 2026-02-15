@@ -7,12 +7,14 @@ import { useCurrency } from '@/context/CurrencyContext';
 import { CurrencySelector } from './CurrencySelector';
 import WelcomeScreen from './WelcomeScreen';
 import { ManageAccountModal } from './ManageAccountModal';
+import { ConfirmationModal } from './ui/ConfirmationModal';
 
 export const BalanceSheet: React.FC = () => {
   const { getAccountsWithBalances, deleteAccount, updateAccount, isLoading } = useFinance();
   const { formatCurrency } = useCurrency();
   const accountsWithBalances = getAccountsWithBalances();
   const [editingAccount, setEditingAccount] = useState<Account | null>(null);
+  const [accountToDelete, setAccountToDelete] = useState<Account | null>(null);
 
   const handleSaveAccount = (updates: Pick<Account, 'name' | 'category' | 'type'>) => {
     if (!editingAccount) return;
@@ -66,9 +68,8 @@ export const BalanceSheet: React.FC = () => {
               >
                 <span className="text-gray-800">{account.name}</span>
                 <div className="flex items-center space-x-2">
-                  <span className={`font-medium ${
-                    account.currentBalance >= 0 ? 'text-green-600' : 'text-red-600'
-                  }`}>
+                  <span className={`font-medium ${account.currentBalance >= 0 ? 'text-green-600' : 'text-red-600'
+                    }`}>
                     {formatCurrency(account.currentBalance)}
                   </span>
                   <button
@@ -79,7 +80,7 @@ export const BalanceSheet: React.FC = () => {
                     Edit
                   </button>
                   <button
-                    onClick={() => deleteAccount(account.id)}
+                    onClick={() => setAccountToDelete(account)}
                     className="text-red-500 hover:text-red-700 text-sm px-2 py-1 rounded hover:bg-red-50 transition-colors"
                     title="Delete account"
                   >
@@ -205,6 +206,21 @@ export const BalanceSheet: React.FC = () => {
           onSave={handleSaveAccount}
         />
       )}
+
+      <ConfirmationModal
+        isOpen={!!accountToDelete}
+        onClose={() => setAccountToDelete(null)}
+        onConfirm={() => {
+          if (accountToDelete) {
+            deleteAccount(accountToDelete.id);
+            setAccountToDelete(null);
+          }
+        }}
+        title={accountToDelete?.name.toLowerCase().includes('card') ? 'Delete Card' : 'Delete Account'}
+        message={`Are you sure you want to delete "${accountToDelete?.name}"? This will also remove all associated balance history. This action cannot be undone.`}
+        confirmText="Delete"
+        variant="danger"
+      />
     </div>
   );
 };

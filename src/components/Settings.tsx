@@ -6,6 +6,7 @@ import { useCurrency } from '@/context/CurrencyContext';
 import { useAuth } from '@/context/AuthContext';
 import { CurrencySelector } from './CurrencySelector';
 import { CloudSyncToggle } from './CloudSyncToggle';
+import { ConfirmationModal } from './ui/ConfirmationModal';
 
 const Settings: React.FC = () => {
   const {
@@ -241,53 +242,31 @@ const Settings: React.FC = () => {
       </div>
 
       {/* Danger Zone */}
-      <div className="bg-red-50 rounded-lg p-6 border border-red-200">
-        <h2 className="text-xl font-semibold text-red-800 mb-4">⚠️ Danger Zone</h2>
-        <p className="text-red-700 mb-4">
+      <div className="bg-red-50 dark:bg-red-900/10 rounded-lg p-6 border border-red-200 dark:border-red-900/30">
+        <h2 className="text-xl font-semibold text-red-800 dark:text-red-400 mb-4">⚠️ Danger Zone</h2>
+        <p className="text-red-700 dark:text-red-300 mb-4">
           Permanently delete all your financial data. This action cannot be undone.
         </p>
 
-        {!showConfirmDelete ? (
-          <button
-            onClick={() => setShowConfirmDelete(true)}
-            className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-md font-medium transition-colors flex items-center space-x-2"
-          >
-            <span>🗑️</span>
-            <span>Clear All Data</span>
-          </button>
-        ) : (
-          <div className="space-y-4">
-            <div className="bg-red-100 border border-red-300 rounded-md p-4">
-              <p className="text-red-800 font-medium">
-                Are you sure you want to delete all data? This will permanently remove:
-              </p>
-              <ul className="list-disc list-inside text-red-700 mt-2 space-y-1">
-                <li>{dataStats.accountsCount} accounts</li>
-                <li>{dataStats.balancesCount} balance records</li>
-                <li>All historical tracking data</li>
-              </ul>
-              <p className="text-red-800 font-medium mt-3">
-                This action cannot be undone!
-              </p>
-            </div>
-
-            <div className="flex space-x-3">
-              <button
-                onClick={handleClearAllData}
-                className="bg-red-700 hover:bg-red-800 text-white px-6 py-2 rounded-md font-medium transition-colors"
-              >
-                Yes, Delete Everything
-              </button>
-              <button
-                onClick={() => setShowConfirmDelete(false)}
-                className="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-2 rounded-md font-medium transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        )}
+        <button
+          onClick={() => setShowConfirmDelete(true)}
+          className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-bold transition-all active:scale-[0.98] flex items-center space-x-2 shadow-lg shadow-red-200 dark:shadow-none"
+        >
+          <span>🗑️</span>
+          <span>Clear All Data</span>
+        </button>
       </div>
+
+      <ConfirmationModal
+        isOpen={showConfirmDelete}
+        onClose={() => setShowConfirmDelete(false)}
+        onConfirm={handleClearAllData}
+        title="Clear All Data"
+        message={`This will permanently remove ${dataStats.accountsCount} accounts and ${dataStats.balancesCount} balance records. This action is irreversible.`}
+        confirmText="Yes, Delete Everything"
+        variant="danger"
+        requiresChallenge={true}
+      />
     </div>
   );
 };
