@@ -1,5 +1,12 @@
-import { Account, Balance } from "@/types/finance";
+import { Account, Balance, RecurringTransaction } from "@/types/finance";
 import { MongoClient } from "mongodb";
+
+interface UserData {
+  userId: string;
+  accounts: Account[];
+  balances: Balance[];
+  calendarEvents?: RecurringTransaction[];
+}
 
 let client: MongoClient | null = null;
 
@@ -14,11 +21,11 @@ function getClient(): MongoClient {
   return client;
 }
 
-export async function getUserCloudData(userId: string): Promise<{ accounts: Account[]; balances: Balance[] } | null> {
+export async function getUserCloudData(userId: string): Promise<{ accounts: Account[]; balances: Balance[]; calendarEvents: RecurringTransaction[] } | null> {
   const client = getClient();
   await client.connect();
   const db = client.db(process.env.MONGODB_DB_NAME);
-  const userCollection = db.collection<{ userId: string; accounts: Account[]; balances: Balance[] }>("user_data");
+  const userCollection = db.collection<UserData>("user_data");
 
   const userData = await userCollection.findOne({ userId });
 
@@ -29,18 +36,32 @@ export async function getUserCloudData(userId: string): Promise<{ accounts: Acco
   return {
     accounts: userData.accounts || [],
     balances: userData.balances || [],
+    calendarEvents: userData.calendarEvents || [],
   };
 }
 
-export async function saveUserCloudData(userId: string, accounts: Account[], balances: Balance[]): Promise<void> {
+export async function saveUserCloudData(
+  userId: string,
+  accounts?: Account[],
+  balances?: Balance[],
+  calendarEvents?: RecurringTransaction[]
+): Promise<void> {
   const client = getClient();
   await client.connect();
   const db = client.db(process.env.MONGODB_DB_NAME);
-  const userCollection = db.collection<{ userId: string; accounts: Account[]; balances: Balance[] }>("user_data");
+  const userCollection = db.collection<UserData>("user_data");
+
+  // Only $set fields that were provided
+  const setFields: Record<string, unknown> = {};
+  if (accounts !== undefined) setFields.accounts = accounts;
+  if (balances !== undefined) setFields.balances = balances;
+  if (calendarEvents !== undefined) setFields.calendarEvents = calendarEvents;
+
+  if (Object.keys(setFields).length === 0) return;
 
   await userCollection.updateOne(
     { userId },
-    { $set: { accounts, balances } },
+    { $set: setFields },
     { upsert: true }
   );
 }
@@ -50,7 +71,7 @@ export async function deleteUserCloudData(userId: string): Promise<void> {
   const client = getClient();
   await client.connect();
   const db = client.db(process.env.MONGODB_DB_NAME);
-  const userCollection = db.collection<{ userId: string; accounts: Account[]; balances: Balance[] }>("user_data");
+  const userCollection = db.collection<UserData>("user_data");
 
   await userCollection.deleteOne({ userId });
 }

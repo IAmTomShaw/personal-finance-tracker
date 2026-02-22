@@ -80,7 +80,7 @@ export const BalanceSheet = () => {
                     Edit
                   </button>
                   <button
-                    onClick={() => deleteAccount(account.id)}
+                    onClick={() => setAccountToDelete(account)}
                     className="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-sm px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
                     title="Delete account"
                   >

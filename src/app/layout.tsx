@@ -4,6 +4,7 @@ import "./globals.css";
 import { FinanceProvider } from "@/context/FinanceContext";
 import { CurrencyProvider } from "@/context/CurrencyContext";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { CalendarProvider } from "@/context/CalendarContext";
 import Navigation from "@/components/Navigation";
 import ClientOnly from "@/components/ClientOnly";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
@@ -52,28 +53,30 @@ export default function RootLayout({
         <AuthProvider>
           <CurrencyProvider>
             <FinanceProvider>
-              <ThemeProvider>
-                <ClientOnly
-                  fallback={
-                    <nav className="bg-white dark:bg-neutral-900 shadow-lg border-b dark:border-neutral-700">
-                      <div className="max-w-6xl mx-auto px-4">
-                        <div className="flex justify-between items-center py-4">
-                          <div className="flex items-center space-x-2">
-                            <span className="text-2xl">📈</span>
-                            <span className="text-xl font-bold text-gray-800 dark:text-neutral-200 hidden sm:block">Personal Finance Tracker</span>
-                            <span className="text-lg font-bold text-gray-800 dark:text-neutral-200 sm:hidden">Finance Tracker</span>
+              <CalendarProvider>
+                <ThemeProvider>
+                  <ClientOnly
+                    fallback={
+                      <nav className="bg-white dark:bg-neutral-900 shadow-lg border-b dark:border-neutral-700">
+                        <div className="max-w-6xl mx-auto px-4">
+                          <div className="flex justify-between items-center py-4">
+                            <div className="flex items-center space-x-2">
+                              <span className="text-2xl">📈</span>
+                              <span className="text-xl font-bold text-gray-800 dark:text-neutral-200 hidden sm:block">Personal Finance Tracker</span>
+                              <span className="text-lg font-bold text-gray-800 dark:text-neutral-200 sm:hidden">Finance Tracker</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </nav>
-                  }
-                >
-                  <Navigation />
-                </ClientOnly>
-                <main className="py-8 px-4">
-                  {children}
-                </main>
-              </ThemeProvider>
+                      </nav>
+                    }
+                  >
+                    <Navigation />
+                  </ClientOnly>
+                  <main className="py-8 px-4">
+                    {children}
+                  </main>
+                </ThemeProvider>
+              </CalendarProvider>
             </FinanceProvider>
           </CurrencyProvider>
         </AuthProvider>
