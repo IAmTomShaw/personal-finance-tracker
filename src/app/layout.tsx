@@ -4,6 +4,7 @@ import "./globals.css";
 import { FinanceProvider } from "@/context/FinanceContext";
 import { CurrencyProvider } from "@/context/CurrencyContext";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { CalendarProvider } from "@/context/CalendarContext";
 import Navigation from "@/components/Navigation";
 import ClientOnly from "@/components/ClientOnly";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
