@@ -32,20 +32,20 @@ const DayEventList: React.FC<DayEventListProps> = ({
 
   if (!selectedDate) {
     return (
-      <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
-        <p className="text-gray-500 text-center">Select a day on the calendar to see its transactions.</p>
+      <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-lg dark:shadow-neutral-900/50 p-4 sm:p-6">
+        <p className="text-gray-500 dark:text-neutral-400 text-center">Select a day on the calendar to see its transactions.</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
-      <h3 className="text-lg font-semibold text-gray-800 mb-4">
+    <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-lg dark:shadow-neutral-900/50 p-4 sm:p-6">
+      <h3 className="text-lg font-semibold text-gray-800 dark:text-neutral-100 mb-4">
         {format(selectedDate, 'EEEE, MMMM d, yyyy')}
       </h3>
 
       {occurrences.length === 0 ? (
-        <p className="text-gray-500 text-sm">No recurring transactions on this day.</p>
+        <p className="text-gray-500 dark:text-neutral-400 text-sm">No recurring transactions on this day.</p>
       ) : (
         <div className="space-y-3">
           {occurrences.map((occ) => {
@@ -56,7 +56,7 @@ const DayEventList: React.FC<DayEventListProps> = ({
             return (
               <div
                 key={tx.id}
-                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors"
+                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 rounded-lg border border-gray-100 dark:border-neutral-700 hover:border-gray-200 dark:hover:border-neutral-600 transition-colors"
               >
                 <div className="flex items-start space-x-3 min-w-0">
                   <div
@@ -64,8 +64,8 @@ const DayEventList: React.FC<DayEventListProps> = ({
                     style={{ backgroundColor: txColor }}
                   />
                   <div className="min-w-0">
-                    <p className="font-medium text-gray-800 truncate">{tx.name}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">
+                    <p className="font-medium text-gray-800 dark:text-neutral-100 truncate">{tx.name}</p>
+                    <p className="text-xs text-gray-500 dark:text-neutral-400 mt-0.5">
                       {tx.category} &middot; {FREQUENCY_LABELS[tx.frequency ?? 'monthly']}
                     </p>
                   </div>
@@ -73,7 +73,7 @@ const DayEventList: React.FC<DayEventListProps> = ({
 
                 <div className="flex items-center space-x-3 shrink-0 sm:ml-3">
                   <span
-                    className={`text-sm font-semibold ${isIncome ? 'text-green-600' : 'text-red-600'}`}
+                    className={`text-sm font-semibold ${isIncome ? 'text-green-600 dark:text-green-500' : 'text-red-600 dark:text-red-500'}`}
                   >
                     {isIncome ? '+' : '-'}{formatCurrency(tx.amount)}
                   </span>
@@ -81,7 +81,7 @@ const DayEventList: React.FC<DayEventListProps> = ({
                   <div className="flex items-center space-x-1">
                     <button
                       onClick={() => onEdit(tx.id)}
-                      className="p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                      className="p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded text-gray-400 dark:text-neutral-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
                       aria-label={`Edit ${tx.name}`}
                       title="Edit"
                     >
@@ -96,7 +96,7 @@ const DayEventList: React.FC<DayEventListProps> = ({
                     </button>
                     <button
                       onClick={() => onDelete(tx.id)}
-                      className="p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                      className="p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded text-gray-400 dark:text-neutral-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
                       aria-label={`Delete ${tx.name}`}
                       title="Delete"
                     >
@@ -117,10 +117,10 @@ const DayEventList: React.FC<DayEventListProps> = ({
 
           {/* Summary */}
           {occurrences.length > 0 && (
-            <div className="pt-3 mt-3 border-t border-gray-100">
+            <div className="pt-3 mt-3 border-t border-gray-100 dark:border-neutral-700">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Day total</span>
-                <span className="font-semibold text-gray-800">
+                <span className="text-gray-500 dark:text-neutral-400">Day total</span>
+                <span className="font-semibold text-gray-800 dark:text-neutral-100">
                   {formatCurrency(
                     occurrences.reduce((sum, occ) => {
                       return sum + (occ.transaction.type === 'income' ? occ.transaction.amount : -occ.transaction.amount);
