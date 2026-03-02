@@ -141,7 +141,7 @@ export const BalanceSheet = () => {
         </div>
         {/* Currency Selection */}
         <div className="mb-8 flex justify-end">
-          <CurrencySelector size="sm" />
+          <CurrencySelector showLabel={false} />
         </div>
         {groupedAccounts.asset && (
           <AccountSection

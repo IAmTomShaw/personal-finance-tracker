@@ -126,7 +126,7 @@ export const HistoricalTracking = () => {
 
         {/* Currency Selection */}
         <div className="mb-6 flex justify-end">
-          <CurrencySelector size="sm" />
+          <CurrencySelector showLabel={false} />
         </div>
 
         {/* Controls */}
